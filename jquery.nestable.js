@@ -36,6 +36,7 @@
         dragClass: 'dd-dragel',
         handleClass: 'dd-handle',
         contentClass: 'dd-content',
+		actionClass: 'dd-action',
         collapsedClass: 'dd-collapsed',
         placeClass: 'dd-placeholder',
         noDragClass: 'dd-nodrag',
@@ -131,11 +132,27 @@
                 var item = $(el),
                     parent = item.parent();
                 list.setParent(item);
-                if (parent.hasClass(list.options.collapsedClass)) {
+				if(parent.hasClass(list.options.collapsedClass)){
                     list.collapseItem(parent.parent());
+				}
+                if (!parent.parent().hasClass(list.options.collapsedClass)) {
+					parent.parent().children('button.dd-expand').hide();
+					parent.parent().children('button.dd-collapse').show();
                 }
+				else{
+					parent.parent().children('button.dd-expand').show();
+					parent.parent().children('button.dd-collapse').hide();
+				}
             });
-
+			$('.' + list.options.actionClass).click(function (){
+				var actionAll = $(this).data('action');
+				if(actionAll === 'collapse-all'){
+					$('.' + list.options.rootClass).nestable('collapseAll');
+				}
+				if (actionAll === 'expand-all'){
+					$('.' + list.options.rootClass).nestable('expandAll');
+				}
+			});
             // Append the .dd-empty div if the list don't have any items on init
             if (!items.length) {
                 this.appendEmptyElement(this.el);
@@ -150,9 +167,13 @@
                     item = target.parents(list.options.itemNodeName).eq(0);
                 if (action === 'collapse') {
                     list.collapseItem(item);
+					target.parent().children('button.dd-expand').show();
+					target.parent().children('button.dd-collapse').hide();
                 }
-                if (action === 'expand') {
+                else if (action === 'expand') {
                     list.expandItem(item);
+					target.parent().children('button.dd-expand').hide();
+					target.parent().children('button.dd-collapse').show();
                 }
             });
 
@@ -649,12 +670,16 @@
 
         expandItem: function(li) {
             li.removeClass(this.options.collapsedClass);
+				li.children('.dd-expand').hide();
+				li.children('.dd-collapse').show();
         },
 
         collapseItem: function(li) {
             var lists = li.children(this.options.listNodeName);
             if (lists.length) {
                 li.addClass(this.options.collapsedClass);
+				li.children('.dd-expand').show();
+				li.children('.dd-collapse').hide();
             }
         },
 
@@ -679,6 +704,11 @@
                 li.children('[data-action]').remove();
                 li.prepend($(this.options.expandBtnHTML));
                 li.prepend($(this.options.collapseBtnHTML));
+				//var liParent = li.parent();
+				//if(liParent.hasClass(this.options.collapsedClass))
+				//	liParent.children('.dd-expand').hide();
+				//else if (!liParent.hasClass(this.options.collapsedClass))
+				//	liParent.children('.dd-collapse').hide();
             }
         },
 
